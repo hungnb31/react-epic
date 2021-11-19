@@ -12,34 +12,26 @@ import '../box-styles.css'
 
 // 🐨 add a style prop to each of them as well so their background color
 // matches what the text says it should be as well as `fontStyle: 'italic'`
-const Box = ({className, style, children}) => {
+const Box = ({size, style, children}) => {
+  const sizeClass = size ? `box--${size}` : ''
   return (
-    <div className={`box ${className}`} style={{fontStyle: 'italic', ...style}}>
+    <div className={`box ${sizeClass}`} style={{fontStyle: 'italic', ...style}}>
       {children}
     </div>
   )
 }
 const smallBox = (
-  <Box
-    className="box box--small"
-    style={{fontStyle: 'italic', background: 'lightBlue'}}
-  >
+  <Box size="small" style={{fontStyle: 'italic', background: 'lightBlue'}}>
     small lightblue box
   </Box>
 )
 const mediumBox = (
-  <Box
-    className="box box--medium"
-    style={{fontStyle: 'italic', background: 'pink'}}
-  >
+  <Box size="medium" style={{fontStyle: 'italic', background: 'pink'}}>
     medium pink box
   </Box>
 )
 const largeBox = (
-  <Box
-    className="box box--large"
-    style={{fontStyle: 'italic', background: 'orange'}}
-  >
+  <Box size="large" style={{fontStyle: 'italic', background: 'orange'}}>
     large orange box
   </Box>
 )
