@@ -1,1 +1,1 @@
-# react-epic
+# React Epic
