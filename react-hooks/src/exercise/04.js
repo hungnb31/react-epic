@@ -2,6 +2,7 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
+import {useLocalStorageState} from '../utils'
 
 function Board({onClick, squares}) {
   function renderSquare(i) {
@@ -35,8 +36,13 @@ function Board({onClick, squares}) {
 }
 
 function Game() {
-  const [history, setHistory] = React.useState([Array(9).fill(null)])
-  const [currentStep, setCurrentStep] = React.useState(0)
+  const [history, setHistory] = useLocalStorageState('tic-toc-toe:squares', [
+    Array(9).fill(null),
+  ])
+  const [currentStep, setCurrentStep] = useLocalStorageState(
+    'tic-toc-toe:step',
+    0,
+  )
 
   const currentSquares = history[currentStep]
   const nextValue = calculateNextValue(currentSquares)
