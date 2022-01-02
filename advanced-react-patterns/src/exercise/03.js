@@ -15,14 +15,9 @@ function Toggle({ children }) {
   // 🐨 remove all this 💣 and instead return <ToggleContext.Provider> where
   // the value is an object that has `on` and `toggle` on it.
 
+  // we don't need to pass `on` and `toggle` to child component cause we will pass those props through context
   return (
-    <ToggleContext.Provider value={{ on, toggle }}>{
-      React.Children.map(children, child => {
-        return typeof child.type === 'string'
-          ? child
-          : React.cloneElement(child, { on, toggle })
-      })
-    }</ToggleContext.Provider>
+    <ToggleContext.Provider value={{ on, toggle }}>{children}</ToggleContext.Provider>
   )
 
   // return React.Children.map(children, child => {
@@ -35,8 +30,8 @@ function Toggle({ children }) {
 function useToggle() {
   const context = React.useContext(ToggleContext)
 
-  if (typeof context === "undefined") {
-    throw new Error("useToggle need to use inside ToggleProvider")
+  if (!context) {
+    throw new Error("useToggle must be used inside <Toggle>")
   }
 
   return context
