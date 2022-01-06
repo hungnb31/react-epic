@@ -2,20 +2,23 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import warning from 'warning';
-import { Switch } from '../switch'
+import warning from 'warning'
+import {Switch} from '../switch'
 
-const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
+const callAll =
+  (...fns) =>
+  (...args) =>
+    fns.forEach(fn => fn?.(...args))
 
 const actionTypes = {
   toggle: 'toggle',
   reset: 'reset',
 }
 
-function toggleReducer(state, { type, initialState }) {
+function toggleReducer(state, {type, initialState}) {
   switch (type) {
     case actionTypes.toggle: {
-      return { on: !state.on }
+      return {on: !state.on}
     }
     case actionTypes.reset: {
       return initialState
@@ -26,22 +29,26 @@ function toggleReducer(state, { type, initialState }) {
   }
 }
 
-function useControlledSwitchWarning(controlPropValue, controlPropName, componentName) {
+function useControlledSwitchWarning(
+  controlPropValue,
+  controlPropName,
+  componentName,
+) {
   // save the ref of current component to know if component change between controlled and uncontrolled
-  const isControlled = controlPropValue != null;
-  const { current: wasControlled } = React.useRef(isControlled);
+  const isControlled = controlPropValue != null
+  const {current: wasControlled} = React.useRef(isControlled)
 
   React.useEffect(() => {
     // if component is controlled but it was not being controlled before
     warning(
       !(isControlled && !wasControlled),
-      `${componentName} is changing from uncontrolled to be controlled. Components should not switch from uncontrolled to controlled (or vise versa). Decide between using a controlled or uncontrolled ${componentName} for the lifetime of the component. Check the ${controlPropName} prop.`
+      `${componentName} is changing from uncontrolled to be controlled. Components should not switch from uncontrolled to controlled (or vise versa). Decide between using a controlled or uncontrolled ${componentName} for the lifetime of the component. Check the ${controlPropName} prop.`,
     )
 
     // if component is uncontrolled but it was not being controlled before
     warning(
       !(!isControlled && wasControlled),
-      `${componentName} is changing from controlled to be uncontrolled. Components should not switch from controlled to uncontrolled (or vise versa). Decide between using a controlled or uncontrolled ${componentName} for the lifetime of the component. Check the ${controlPropName} prop.`
+      `${componentName} is changing from controlled to be uncontrolled. Components should not switch from controlled to uncontrolled (or vise versa). Decide between using a controlled or uncontrolled ${componentName} for the lifetime of the component. Check the ${controlPropName} prop.`,
     )
   }, [isControlled, wasControlled, componentName, controlPropName])
 }
@@ -55,24 +62,29 @@ function useToggle({
   // if component got readOnly prop, we allow developer provide on prop without onChange prop
   readOnly = false,
 } = {}) {
-  const { current: initialState } = React.useRef({ on: initialOn })
+  const {current: initialState} = React.useRef({on: initialOn})
   const [state, dispatch] = React.useReducer(reducer, initialState)
   // check if controlledOn != null, mean that this component being controlled
   // because we got the on props
-  const onIsControlled = controlledOn != null;
+  const onIsControlled = controlledOn != null
 
-  const on = onIsControlled ? controlledOn : state.on;
+  const on = onIsControlled ? controlledOn : state.on
 
-  // check if this component reveived onChange prop or not
-  const hasOnChange = Boolean(onChange);
+  if (process.env.NODE_ENV !== 'production') {
+    // check if this component reveived onChange prop or not
+    const hasOnChange = Boolean(onChange)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    React.useEffect(() => {
+      // if component got the on prop, but didn't got the onChange or readOnly prop
+      warning(
+        !(!hasOnChange && onIsControlled && !readOnly),
+        `An 'on' prop was provided to useToggle without an 'onChange' handler. This will render a read-only toggle. If you want it to be mutable, use 'initialOn'. Otherwise, set either 'onChange' or 'readOnly'`,
+      )
+    })
 
-  React.useEffect(() => {
-    // if component got the on prop, but didn't got the onChange or readOnly prop
-    warning(!(!hasOnChange && onIsControlled && !readOnly),
-      `An 'on' prop was provided to useToggle without an 'onChange' handler. This will render a read-only toggle. If you want it to be mutable, use 'initialOn'. Otherwise, set either 'onChange' or 'readOnly'`);
-  })
-
-  useControlledSwitchWarning(controlledOn, 'on', 'useToggle');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useControlledSwitchWarning(controlledOn, 'on', 'useToggle')
+  }
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
@@ -82,13 +94,14 @@ function useToggle({
     // we use reducer(state, action) to get the suggested changes
     // suggested changes refers to the changes we would make if we were managing the state ourselves
     // when developer pass a readOnly prop, there is a case that onIsControlled but we don't have the onChange function, so we need to add a `?.` to the onChange
-    onChange?.(reducer({ ...state, on }, action), action); // we run the onChange, mean if component is being controlled, we need to run the onChange function from props
+    onChange?.(reducer({...state, on}, action), action) // we run the onChange, mean if component is being controlled, we need to run the onChange function from props
   }
 
-  const toggle = () => dispatchWithOnChange({ type: actionTypes.toggle })
-  const reset = () => dispatchWithOnChange({ type: actionTypes.reset, initialState })
+  const toggle = () => dispatchWithOnChange({type: actionTypes.toggle})
+  const reset = () =>
+    dispatchWithOnChange({type: actionTypes.reset, initialState})
 
-  function getTogglerProps({ onClick, ...props } = {}) {
+  function getTogglerProps({onClick, ...props} = {}) {
     return {
       'aria-pressed': on,
       onClick: callAll(onClick, toggle),
@@ -96,7 +109,7 @@ function useToggle({
     }
   }
 
-  function getResetterProps({ onClick, ...props } = {}) {
+  function getResetterProps({onClick, ...props} = {}) {
     return {
       onClick: callAll(onClick, reset),
       ...props,
@@ -112,9 +125,13 @@ function useToggle({
   }
 }
 
-function Toggle({ on: controlledOn, onChange, readOnly }) {
-  const { on, getTogglerProps } = useToggle({ on: controlledOn, onChange, readOnly })
-  const props = getTogglerProps({ on })
+function Toggle({on: controlledOn, onChange, readOnly}) {
+  const {on, getTogglerProps} = useToggle({
+    on: controlledOn,
+    onChange,
+    readOnly,
+  })
+  const props = getTogglerProps({on})
   return <Switch {...props} />
 }
 
@@ -171,7 +188,7 @@ function App() {
 
 export default App
 // we're adding the Toggle export for tests
-export { Toggle }
+export {Toggle}
 
 /*
 eslint
