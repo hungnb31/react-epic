@@ -49,8 +49,26 @@ function useToggle({
   React.useEffect(() => {
     // if component got the on prop, but didn't got the onChange or readOnly prop
     warning(!(!hasOnChange && onIsControlled && !readOnly),
-    `An 'on' prop was provided to useToggle without an 'onChange' handler. This will render a read-only toggle. If you want it to be mutable, use 'initialOn'. Otherwise, set either 'onChange' or 'readOnly'`);
+      `An 'on' prop was provided to useToggle without an 'onChange' handler. This will render a read-only toggle. If you want it to be mutable, use 'initialOn'. Otherwise, set either 'onChange' or 'readOnly'`);
   })
+
+
+  // save the ref of current component to know if component change between controlled and uncontrolled
+  const { current: onWasControlled } = React.useRef(onIsControlled);
+
+  React.useEffect(() => {
+    // if component is controlled but it was not being controlled before
+    warning(
+      !(onIsControlled && !onWasControlled),
+      `'useToggle' is changing from uncontrolled to be controlled. Components should not switch from uncontrolled to controlled (or vise versa). Decide between using a controlled or uncontrolled 'useToggle' for the lifetime of the component. Check the 'on' prop.`
+    )
+
+    // if component is uncontrolled but it was not being controlled before
+    warning(
+      !(!onIsControlled && onWasControlled),
+      `'useToggle' is changing from controlled to be uncontrolled. Components should not switch from controlled to uncontrolled (or vise versa). Decide between using a controlled or uncontrolled 'useToggle' for the lifetime of the component. Check the 'on' prop.`
+    )
+  }, [onIsControlled, onWasControlled])
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
@@ -59,7 +77,8 @@ function useToggle({
 
     // we use reducer(state, action) to get the suggested changes
     // suggested changes refers to the changes we would make if we were managing the state ourselves
-    onChange(reducer({ ...state, on }, action), action); // we run the onChange, mean if component is being controlled, we need to run the onChange function from props
+    // when developer pass a readOnly prop, there is a case that onIsControlled but we don't have the onChange function, so we need to add a `?.` to the onChange
+    onChange?.(reducer({ ...state, on }, action), action); // we run the onChange, mean if component is being controlled, we need to run the onChange function from props
   }
 
   const toggle = () => dispatchWithOnChange({ type: actionTypes.toggle })
