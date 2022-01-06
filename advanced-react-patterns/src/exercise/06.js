@@ -70,6 +70,7 @@ function useToggle({
 
   const on = onIsControlled ? controlledOn : state.on
 
+  // added this to not throw warning on production
   if (process.env.NODE_ENV !== 'production') {
     // check if this component reveived onChange prop or not
     const hasOnChange = Boolean(onChange)
