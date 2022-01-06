@@ -2,6 +2,7 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
+import warning from 'warning';
 import { Switch } from '../switch'
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
@@ -31,6 +32,8 @@ function useToggle({
   // receive onChange and on props to make this component controllable
   onChange,
   on: controlledOn,
+  // if component got readOnly prop, we allow developer provide on prop without onChange prop
+  readOnly = false,
 } = {}) {
   const { current: initialState } = React.useRef({ on: initialOn })
   const [state, dispatch] = React.useReducer(reducer, initialState)
@@ -39,6 +42,15 @@ function useToggle({
   const onIsControlled = controlledOn != null;
 
   const on = onIsControlled ? controlledOn : state.on;
+
+  // check if this component reveived onChange prop or not
+  const hasOnChange = Boolean(onChange);
+
+  React.useEffect(() => {
+    // if component got the on prop, but didn't got the onChange or readOnly prop
+    warning(!(!hasOnChange && onIsControlled && !readOnly),
+    `An 'on' prop was provided to useToggle without an 'onChange' handler. This will render a read-only toggle. If you want it to be mutable, use 'initialOn'. Otherwise, set either 'onChange' or 'readOnly'`);
+  })
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
@@ -77,8 +89,8 @@ function useToggle({
   }
 }
 
-function Toggle({ on: controlledOn, onChange }) {
-  const { on, getTogglerProps } = useToggle({ on: controlledOn, onChange })
+function Toggle({ on: controlledOn, onChange, readOnly }) {
+  const { on, getTogglerProps } = useToggle({ on: controlledOn, onChange, readOnly })
   const props = getTogglerProps({ on })
   return <Switch {...props} />
 }
@@ -105,7 +117,9 @@ function App() {
       <div>
         {/* two component below are being controlling by developer */}
         {/* they provider their own on and onChange props */}
-        <Toggle on={bothOn} onChange={handleToggleChange} />
+
+        {/* if toggle doesn't have onChange prop, we need to provide readOnly prop */}
+        <Toggle on={bothOn} readOnly={true} />
         <Toggle on={bothOn} onChange={handleToggleChange} />
       </div>
       {timesClicked > 4 ? (
