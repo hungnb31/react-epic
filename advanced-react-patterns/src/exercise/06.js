@@ -3,22 +3,22 @@
 
 import * as React from 'react'
 import warning from 'warning'
-import {Switch} from '../switch'
+import { Switch } from 'switch'
 
 const callAll =
   (...fns) =>
-  (...args) =>
-    fns.forEach(fn => fn?.(...args))
+    (...args) =>
+      fns.forEach(fn => fn?.(...args))
 
 const actionTypes = {
   toggle: 'toggle',
   reset: 'reset',
 }
 
-function toggleReducer(state, {type, initialState}) {
+function toggleReducer(state, { type, initialState }) {
   switch (type) {
     case actionTypes.toggle: {
-      return {on: !state.on}
+      return { on: !state.on }
     }
     case actionTypes.reset: {
       return initialState
@@ -36,7 +36,7 @@ function useControlledSwitchWarning(
 ) {
   // save the ref of current component to know if component change between controlled and uncontrolled
   const isControlled = controlPropValue != null
-  const {current: wasControlled} = React.useRef(isControlled)
+  const { current: wasControlled } = React.useRef(isControlled)
 
   React.useEffect(() => {
     // if component is controlled but it was not being controlled before
@@ -62,7 +62,7 @@ function useToggle({
   // if component got readOnly prop, we allow developer provide on prop without onChange prop
   readOnly = false,
 } = {}) {
-  const {current: initialState} = React.useRef({on: initialOn})
+  const { current: initialState } = React.useRef({ on: initialOn })
   const [state, dispatch] = React.useReducer(reducer, initialState)
   // check if controlledOn != null, mean that this component being controlled
   // because we got the on props
@@ -95,14 +95,14 @@ function useToggle({
     // we use reducer(state, action) to get the suggested changes
     // suggested changes refers to the changes we would make if we were managing the state ourselves
     // when developer pass a readOnly prop, there is a case that onIsControlled but we don't have the onChange function, so we need to add a `?.` to the onChange
-    onChange?.(reducer({...state, on}, action), action) // we run the onChange, mean if component is being controlled, we need to run the onChange function from props
+    onChange?.(reducer({ ...state, on }, action), action) // we run the onChange, mean if component is being controlled, we need to run the onChange function from props
   }
 
-  const toggle = () => dispatchWithOnChange({type: actionTypes.toggle})
+  const toggle = () => dispatchWithOnChange({ type: actionTypes.toggle })
   const reset = () =>
-    dispatchWithOnChange({type: actionTypes.reset, initialState})
+    dispatchWithOnChange({ type: actionTypes.reset, initialState })
 
-  function getTogglerProps({onClick, ...props} = {}) {
+  function getTogglerProps({ onClick, ...props } = {}) {
     return {
       'aria-pressed': on,
       onClick: callAll(onClick, toggle),
@@ -110,7 +110,7 @@ function useToggle({
     }
   }
 
-  function getResetterProps({onClick, ...props} = {}) {
+  function getResetterProps({ onClick, ...props } = {}) {
     return {
       onClick: callAll(onClick, reset),
       ...props,
@@ -126,13 +126,13 @@ function useToggle({
   }
 }
 
-function Toggle({on: controlledOn, onChange, readOnly}) {
-  const {on, getTogglerProps} = useToggle({
+function Toggle({ on: controlledOn, onChange, readOnly }) {
+  const { on, getTogglerProps } = useToggle({
     on: controlledOn,
     onChange,
     readOnly,
   })
-  const props = getTogglerProps({on})
+  const props = getTogglerProps({ on })
   return <Switch {...props} />
 }
 
@@ -189,7 +189,7 @@ function App() {
 
 export default App
 // we're adding the Toggle export for tests
-export {Toggle}
+export { Toggle }
 
 /*
 eslint
