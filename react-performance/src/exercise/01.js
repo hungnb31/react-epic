@@ -9,20 +9,8 @@ import * as React from 'react'
 function App() {
   const [showGlobe, setShowGlobe] = React.useState(false)
 
-  // define a function that import the Globe component
-
-  // webpack doesn't care about how many time you import a module
-  // so if we import it already, that module will be cached
-  // which mean when code run into React.lazy and execute the import
-  // the module was already loaded
-  const loadGlobe = () => {
-    return import('../globe')
-  }
-
-  // instead of import Globe component like normal
-  // we are using React.lazy to lazy load it whenever we need it
-  // right here, we expected that Globe component was already imported
-  const Globe = React.lazy(() => import('../globe'))
+  // we added a magic comment to tell webpack that we want to prefetch this module
+  const Globe = React.lazy(() => import( /* webpackPrefetch: true */ '../globe'))
 
   return (
     <div
@@ -35,10 +23,7 @@ function App() {
         padding: '2rem',
       }}
     >
-      {/* we are using onMouseEnter and onFocus to import the module we need */}
-      {/* which mean when user hover or focus on the checkbox, we already load the module from those actions
-      so no need to check the checkbox to load it */}
-      <label onMouseEnter={loadGlobe} onFocus={loadGlobe} style={{marginBottom: '1rem'}}>
+      <label style={{marginBottom: '1rem'}}>
         <input
           type="checkbox"
           checked={showGlobe}
