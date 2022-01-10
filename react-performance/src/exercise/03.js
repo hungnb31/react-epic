@@ -60,7 +60,24 @@ function ListItem({
 }
 
 // use memo here to avoid unnesesary re-render
-ListItem = React.memo(ListItem);
+ListItem = React.memo(ListItem, (prevProps, nextProps) => {
+  // we want to re-render in these 4 cases, it's all the props of this item
+  if (prevProps.items !== nextProps.items) return false;
+  if (prevProps.getMenuProps !== nextProps.getMenuProps) return false;
+  if (prevProps.getItemProps !== nextProps.getItemProps) return false;
+  if (prevProps.selectedItem !== nextProps.selectedItem) return false;
+
+  // for the highlightedIndex, we should consider if it should re-render
+  if (prevProps.highlightedIndex !== nextProps.highlightedIndex) {
+    const wasPrevHighlighted = prevProps.highlightedIndex === prevProps.index;
+    const isNowHighlighted = nextProps.highlightedIndex === nextProps.index;
+    // if highlighted state of item changes, we need to re-render (return false) and vise versa (return true)
+    return wasPrevHighlighted === isNowHighlighted;
+  }
+
+  // if not in the cases above, does not need to re-render
+  return true;
+});
 
 function App() {
   const forceRerender = useForceRerender()
