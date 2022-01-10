@@ -30,7 +30,9 @@ function Menu({
     </ul>
   )
 }
-// 🐨 Memoize the Menu here using React.memo
+
+// use memo here to avoid unnesesary re-render
+Menu = React.memo(Menu);
 
 function ListItem({
   getItemProps,
@@ -56,7 +58,9 @@ function ListItem({
     />
   )
 }
-// 🐨 Memoize the ListItem here using React.memo
+
+// use memo here to avoid unnesesary re-render
+ListItem = React.memo(ListItem);
 
 function App() {
   const forceRerender = useForceRerender()
@@ -66,7 +70,10 @@ function App() {
   React.useEffect(() => {
     run(getItems(inputValue))
   }, [inputValue, run])
-  const items = allItems.slice(0, 100)
+  // we also need to use useMemo to cache the value of items
+  // by caching this, the props to component Menu it not gonna change
+  // which mean Menu component will not be re-render
+  const items = React.useMemo(() => allItems.slice(0, 100), [allItems])
 
   const {
     selectedItem,
