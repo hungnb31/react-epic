@@ -21,8 +21,10 @@ function Menu({
           getItemProps={getItemProps}
           item={item}
           index={index}
-          selectedItem={selectedItem}
-          highlightedIndex={highlightedIndex}
+          // try to pass primitive value here to avoid calculation in component
+          // and also avoid re-render
+          isSelected={selectedItem?.id === item.id}
+          isHighlighted={highlightedIndex === index}
         >
           {item.name}
         </ListItem>
@@ -38,12 +40,11 @@ function ListItem({
   getItemProps,
   item,
   index,
-  selectedItem,
-  highlightedIndex,
+  // change to receive primitive props
+  isSelected,
+  isHighlighted,
   ...props
 }) {
-  const isSelected = selectedItem?.id === item.id
-  const isHighlighted = highlightedIndex === index
   return (
     <li
       {...getItemProps({
@@ -59,25 +60,7 @@ function ListItem({
   )
 }
 
-// use memo here to avoid unnesesary re-render
-ListItem = React.memo(ListItem, (prevProps, nextProps) => {
-  // we want to re-render in these 4 cases, it's all the props of this item
-  if (prevProps.items !== nextProps.items) return false;
-  if (prevProps.getMenuProps !== nextProps.getMenuProps) return false;
-  if (prevProps.getItemProps !== nextProps.getItemProps) return false;
-  if (prevProps.selectedItem !== nextProps.selectedItem) return false;
-
-  // for the highlightedIndex, we should consider if it should re-render
-  if (prevProps.highlightedIndex !== nextProps.highlightedIndex) {
-    const wasPrevHighlighted = prevProps.highlightedIndex === prevProps.index;
-    const isNowHighlighted = nextProps.highlightedIndex === nextProps.index;
-    // if highlighted state of item changes, we need to re-render (return false) and vise versa (return true)
-    return wasPrevHighlighted === isNowHighlighted;
-  }
-
-  // if not in the cases above, does not need to re-render
-  return true;
-});
+ListItem = React.memo(ListItem);
 
 function App() {
   const forceRerender = useForceRerender()
