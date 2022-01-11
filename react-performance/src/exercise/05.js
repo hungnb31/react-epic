@@ -38,8 +38,11 @@ function AppProvider({children}) {
     dogName: '',
     grid: initialGrid,
   })
-  // 🐨 memoize this value with React.useMemo
-  const value = [state, dispatch]
+  // even we already use React.memo for Grid and Cell component
+  // but it's actually not help at all. because we are passing an array to Provider
+  // that it's not a primitive value, and even the value inside array not change
+  // the array itself still be difference for each render, that's why it triggered rerender
+  const value = React.useMemo(() => [state, dispatch], [state])
   return (
     <AppStateContext.Provider value={value}>
       {children}
@@ -71,6 +74,7 @@ function Grid() {
     />
   )
 }
+// the memorized right here does not help if we not memorize the value of context
 Grid = React.memo(Grid)
 
 function Cell({row, column}) {
@@ -90,6 +94,7 @@ function Cell({row, column}) {
     </button>
   )
 }
+// the memorized right here does not help if we not memorize the value of context
 Cell = React.memo(Cell)
 
 function DogNameInput() {
