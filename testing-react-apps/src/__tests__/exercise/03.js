@@ -3,7 +3,8 @@
 
 import * as React from 'react'
 // 🐨 add `screen` to the import here:
-import {render, fireEvent, screen} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
+import userEvent from "@testing-library/user-event"
 import Counter from '../../components/counter'
 
 test('counter increments and decrements when the buttons are clicked', () => {
@@ -25,8 +26,16 @@ test('counter increments and decrements when the buttons are clicked', () => {
   const message = container.firstChild.querySelector('div')
 
   expect(message).toHaveTextContent('Current count: 0')
-  fireEvent.click(increment)
+  // what if user not just click the button but they could use mouseup or mousedown
+  // to trigger event
+  // so our test would fail because we just test the click event
+  // so we need to use userEvent instead of fireEvent because
+  // userEvent should test every "click" event that user can have
+
+  // with this change, even if we change the action in component from 
+  // onClick to onMouseDown or onMouseUp, the test still pass
+  userEvent.click(increment)
   expect(message).toHaveTextContent('Current count: 1')
-  fireEvent.click(decrement)
+  userEvent.click(decrement)
   expect(message).toHaveTextContent('Current count: 0')
 })
