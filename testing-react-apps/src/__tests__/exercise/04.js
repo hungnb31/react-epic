@@ -9,11 +9,13 @@ import faker from "faker"
 import Login from '../../components/login'
 
 // we create this function to generate form data
-function buildLoginForm() {
+// we also allow other developer to override
+// with their own username and password for special cases
+function buildLoginForm(overrides) {
   const username = faker.internet.userName()
   const password = faker.internet.password()
 
-  return {username, password}
+  return {username, password, ...overrides}
 }
 
 test('submitting the form calls onSubmit with username and password', () => {
