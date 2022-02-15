@@ -4,19 +4,19 @@
 import * as React from 'react'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import faker from "faker"
+import { build, fake } from '@jackfranklin/test-data-bot'
 
 import Login from '../../components/login'
 
 // we create this function to generate form data
-// we also allow other developer to override
-// with their own username and password for special cases
-function buildLoginForm(overrides) {
-  const username = faker.internet.userName()
-  const password = faker.internet.password()
-
-  return {username, password, ...overrides}
-}
+// we can use test-data-bot to generate fake form data
+// this also handle override for us
+const buildLoginForm = build({
+  fields: {
+    username: fake(faker => faker.internet.userName()),
+    password: fake(faker => faker.internet.password())
+  }
+})
 
 test('submitting the form calls onSubmit with username and password', () => {
   // 🐨 create a variable called "submittedData" and a handleSubmit function that
