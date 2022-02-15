@@ -4,7 +4,17 @@
 import * as React from 'react'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import faker from "faker"
+
 import Login from '../../components/login'
+
+// we create this function to generate form data
+function buildLoginForm() {
+  const username = faker.internet.userName()
+  const password = faker.internet.password()
+
+  return {username, password}
+}
 
 test('submitting the form calls onSubmit with username and password', () => {
   // 🐨 create a variable called "submittedData" and a handleSubmit function that
@@ -17,24 +27,32 @@ test('submitting the form calls onSubmit with username and password', () => {
   //
   render(<Login onSubmit={handleSubmit} />)
   // 🐨 get the username and password fields via `getByLabelText`
-  const username = screen.getByLabelText(/username/i)
-  const password = screen.getByLabelText(/password/i)
-  const submit = screen.getByRole('button', { name: /submit/i })
+  const usernameEle = screen.getByLabelText(/username/i)
+  const passwordEle = screen.getByLabelText(/password/i)
+  const submitEle = screen.getByRole('button', { name: /submit/i })
   // 🐨 use userEvent.type to change the username and password fields to
   //    whatever you want
-  userEvent.type(username, "username")
-  userEvent.type(password, "password")
+
+  // instead of manually typing the fake username and password
+  // we want to make sure if other guys reading this code
+  // they can understand no matter what username and password is
+  // this test should still pass
+
+  // so we want to generate the form data for the test
+  const {username, password} = buildLoginForm()
+  userEvent.type(usernameEle, username)
+  userEvent.type(passwordEle, password)
   //
   // 🐨 click on the button with the text "Submit"
   //
-  userEvent.click(submit)
+  userEvent.click(submitEle)
   // assert that submittedData is correct
   // 💰 use `toEqual` from Jest: 📜 https://jestjs.io/docs/en/expect#toequalvalue
 
   // we can test the args passed to the jest.fn with `toBeCalledWith`
   expect(handleSubmit).toBeCalledWith({
-    username: "username",
-    password: "password"
+    username,
+    password
   })
 
   // the handle function should be called only 1 time
