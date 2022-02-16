@@ -7,8 +7,8 @@ import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {build, fake} from '@jackfranklin/test-data-bot'
 // 🐨 you'll need to import rest from 'msw' and setupServer from msw/node
-import { rest } from 'msw'
-import { setupServer } from 'msw/node' 
+import {setupServer} from 'msw/node'
+import {handlers} from 'test/server-handlers'
 import Login from '../../components/login-submission'
 
 const buildLoginForm = build({
@@ -18,14 +18,10 @@ const buildLoginForm = build({
   },
 })
 
-const server = setupServer(
-  rest.post(
-    'https://auth-provider.example.com/api/login',
-    async(req, res, ctx) => {
-      return res(ctx.json({ username: req.body.username }))
-    }
-  )
-)
+// we can reuse the handlers from exported file
+// so we can have that handlers to make server running
+// and we can access that server from browser
+const server = setupServer(...handlers)
 
 beforeAll(() => server.listen())
 afterAll(() => server.close())
