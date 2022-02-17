@@ -61,15 +61,21 @@ test(`logging in displays the user's username`, async () => {
 
 test('omitting the password result in an error', async () => {
   render(<Login />)
-  const { username } = buildLoginForm()
+  const {username} = buildLoginForm()
 
   userEvent.type(screen.getByLabelText(/username/i), username)
 
   // not going to fill in the password
-  userEvent.click(screen.getByRole('button', { name: /submit/i }))
+  userEvent.click(screen.getByRole('button', {name: /submit/i}))
 
   // wait for loading
   await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
-  expect(screen.getByRole('alert')).toHaveTextContent('password required')
+  // the "password required" is autofilled by snapshot
+  // we do this to avoid message change in the future
+  // if the message change, what we need to do is only press "u" in test terminal
+  // so the snapshot will also update
+  expect(screen.getByRole('alert').textContent).toMatchInlineSnapshot(
+    `"password required"`,
+  )
 })
