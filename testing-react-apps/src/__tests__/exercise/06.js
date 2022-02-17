@@ -56,8 +56,16 @@ test('displays the users current location', async () => {
   expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
 
   // right here we resolve the promise to make the method return coords
-  resolve()
-  await promise
+
+  // we also need to wrap this to the "act" method
+  // because when we resolve the methods to get current user coords
+  // it will trigger some side effect in react
+  // and when we wrap everything cause the side effect in the "act"
+  // react will handle all the side effect for us
+  await act(async () => {
+    resolve()
+    await promise
+  })
 
   // we make sure screen no longer has loading
   expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument()
