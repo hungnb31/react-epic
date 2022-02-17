@@ -9,6 +9,12 @@ import Location from '../../examples/location'
 
 // 💰 I'm going to give you this handy utility function
 // it allows you to create a promise that you can resolve/reject on demand.
+beforeAll(() => {
+  window.navigator.geolocation = {
+    getCurrentPosition: jest.fn()
+  }
+})
+
 function deferred() {
   let resolve, reject
   const promise = new Promise((res, rej) => {
@@ -26,43 +32,39 @@ function deferred() {
 // // assert on the resolved state
 
 test('displays the users current location', async () => {
-  // 🐨 create a fakePosition object that has an object called "coords" with latitude and longitude
-  // 📜 https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPosition
-  //
-  // 🐨 create a deferred promise here
-  //
-  // 🐨 Now we need to mock the geolocation's getCurrentPosition function
-  // To mock something you need to know its API and simulate that in your mock:
-  // 📜 https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
-  //
-  // here's an example of the API:
-  // function success(position) {}
-  // function error(error) {}
-  // navigator.geolocation.getCurrentPosition(success, error)
-  //
-  // 🐨 so call mockImplementation on getCurrentPosition
-  // 🐨 the first argument of your mock should accept a callback
-  // 🐨 you'll call the callback when the deferred promise resolves
-  // 💰 promise.then(() => {/* call the callback with the fake position */})
-  //
-  // 🐨 now that setup is done, render the Location component itself
-  //
-  // 🐨 verify the loading spinner is showing up
-  // 💰 tip: try running screen.debug() to know what the DOM looks like at this point.
-  //
-  // 🐨 resolve the deferred promise
-  // 🐨 wait for the promise to resolve
-  // 💰 right around here, you'll probably notice you get an error log in the
-  // test output. You can ignore that for now and just add this next line:
-  // act(() => {})
-  //
-  // If you'd like, learn about what this means and see if you can figure out
-  // how to make the warning go away (tip, you'll need to use async act)
-  // 📜 https://kentcdodds.com/blog/fix-the-not-wrapped-in-act-warning
-  //
-  // 🐨 verify the loading spinner is no longer in the document
-  //    (💰 use queryByLabelText instead of getByLabelText)
-  // 🐨 verify the latitude and longitude appear correctly
+  const fakePosition = {
+    coords: {
+      latitude: 50,
+      longitude: 100
+    }
+  }
+  
+  const {promise, resolve} = deferred()
+
+  // mock implementation to make method return correct response
+  window.navigator.geolocation.getCurrentPosition.mockImplementation(
+    callback => {
+      // because in real browser, this method not return coords right away
+      // so that's why we return the promise here instead just return coords
+      promise.then(() => callback(fakePosition))
+    }
+  )
+
+  render(<Location />)
+
+  // we should see the loading screen
+  expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
+
+  // right here we resolve the promise to make the method return coords
+  resolve()
+  await promise
+
+  // we make sure screen no longer has loading
+  expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument()
+
+  // we make sure screen display the correct coords
+  expect(screen.getByText(/latitude/i)).toHaveTextContent(`Latitude: ${fakePosition.coords.latitude}`)
+  expect(screen.getByText(/longitude/i)).toHaveTextContent(`Longitude: ${fakePosition.coords.longitude}`)
 })
 
 /*
