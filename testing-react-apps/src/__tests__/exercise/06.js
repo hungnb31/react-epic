@@ -3,17 +3,11 @@
 
 import * as React from 'react'
 import {render, screen, act} from '@testing-library/react'
+import { useCurrentPosition } from 'react-use-geolocation'
 import Location from '../../examples/location'
 
-// 🐨 set window.navigator.geolocation to an object that has a getCurrentPosition mock function
-
-// 💰 I'm going to give you this handy utility function
-// it allows you to create a promise that you can resolve/reject on demand.
-beforeAll(() => {
-  window.navigator.geolocation = {
-    getCurrentPosition: jest.fn()
-  }
-})
+// jest will mock all the method this module has
+jest.mock('react-use-geolocation')
 
 function deferred() {
   let resolve, reject
@@ -38,33 +32,25 @@ test('displays the users current location', async () => {
       longitude: 100
     }
   }
-  
-  const {promise, resolve} = deferred()
 
-  // mock implementation to make method return correct response
-  window.navigator.geolocation.getCurrentPosition.mockImplementation(
-    callback => {
-      // because in real browser, this method not return coords right away
-      // so that's why we return the promise here instead just return coords
-      promise.then(() => callback(fakePosition))
-    }
-  )
+  // we create mock function to handle useCurrentLocation logic
+  let setCurrentLocation
+  function useMockCurrentPosition() {
+    const state = React.useState([])
+    setCurrentLocation = state[1]
+    return state[0]
+  }
+  
+  useCurrentPosition.mockImplementation(useMockCurrentPosition)
 
   render(<Location />)
 
   // we should see the loading screen
   expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
 
-  // right here we resolve the promise to make the method return coords
-
-  // we also need to wrap this to the "act" method
-  // because when we resolve the methods to get current user coords
-  // it will trigger some side effect in react
-  // and when we wrap everything cause the side effect in the "act"
-  // react will handle all the side effect for us
-  await act(async () => {
-    resolve()
-    await promise
+  act(() => {
+    // we gonna make mock function return the fake position
+    setCurrentLocation([fakePosition])
   })
 
   // we make sure screen no longer has loading
